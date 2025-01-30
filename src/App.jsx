@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import Search from "./components/Search";
+import Spinner from "./components/Spinner";
 
 const BASE_API_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -14,6 +15,8 @@ const API_OPTIONS = {
 
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [movieList, setMovieList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const fetchMovies = async () => {
     try {
@@ -23,10 +26,18 @@ function App() {
         throw new Error("failed to fetch movies");
       }
       const data = await response.json();
-      console.log(data);
+      if (data.Response === "False") {
+        setErrorMessage(data.Error || "Failed to fetch movies");
+        setMovieList([]);
+        return;
+      }
+      console.log(data.results);
+      setMovieList(data.results);
     } catch (error) {
       console.log(`ERROR while doing fetch movies: ${error}`);
       setErrorMessage("error fetching movies. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,7 +59,20 @@ function App() {
         </header>
         <section className="all-movies">
           <h2>All Movies</h2>
-          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+
+          {isLoading ? (
+            <Spinner />
+          ) : errorMessage ? (
+            <p className="text-red-500">{errorMessage}</p>
+          ) : (
+            <ul>
+              {movieList.map((movie) => (
+                <li key={movie.id} className="text-white">
+                  {movie.title}
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       </div>
     </main>
