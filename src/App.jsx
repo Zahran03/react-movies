@@ -58,6 +58,10 @@ function App() {
           </h1>
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
+        <section className="trending">
+          <h2>Trending Movies</h2>
+          <ul></ul>
+        </section>
         <section className="all-movies">
           <h2 className="mt-[40px]">All Movies</h2>
 
