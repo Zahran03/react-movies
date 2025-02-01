@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import { useDebounce } from "react-use";
 import Search from "./components/Search";
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
@@ -19,9 +19,13 @@ function App() {
   const [movieList, setMovieList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const fetchMovies = async () => {
+  const [debounceSearchTerm, setDebounceSearchTerm] = useState("");
+  useDebounce(() => setDebounceSearchTerm(searchTerm), 500, [searchTerm]);
+  const fetchMovies = async (query = "") => {
     try {
-      const endpoint = `${BASE_API_URL}/discover/movie?sort_by=popularity.desc`;
+      const endpoint = query
+        ? `${BASE_API_URL}/search/movie?query=${encodeURIComponent(query)}`
+        : `${BASE_API_URL}/discover/movie?sort_by=popularity.desc`;
       const response = await fetch(endpoint, API_OPTIONS);
       if (!response.ok) {
         throw new Error("failed to fetch movies");
@@ -43,8 +47,8 @@ function App() {
   };
 
   useEffect(() => {
-    fetchMovies();
-  }, []);
+    fetchMovies(debounceSearchTerm);
+  }, [debounceSearchTerm]);
 
   return (
     <main>
